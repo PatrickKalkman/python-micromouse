@@ -1,17 +1,22 @@
 class BaseMouse:
-    def __init__(self, position, goal, view_distance=2):
+    MOVES = {"up": (-1, 0), "down": (1, 0), "left": (0, -1), "right": (0, 1)}
+
+    def __init__(self, position, goal, maze, view_distance=2):
         self.position = position
         self.goal = goal
         self.view_distance = view_distance
+        self.maze = maze
 
-    def look(self, maze):
-        surrounding = {}
-        for dx in range(-self.view_distance, self.view_distance + 1):
-            for dy in range(-self.view_distance, self.view_distance + 1):
-                x, y = self.position[0] + dx, self.position[1] + dy
-                if 0 <= x < maze.size and 0 <= y < maze.size:
-                    surrounding[(dx, dy)] = maze.get(x, y)
-        return surrounding
+    def look(self):
+        surroundings = {}
+
+        for direction, (dx, dy) in BaseMouse.MOVES.items():
+            x, y = self.position[0] + dx * self.view_distance, self.position[1] + dy * self.view_distance
+
+            if 0 <= x < self.maze.size and 0 <= y < self.maze.size:
+                surroundings[direction] = self.maze.get(x, y)
+
+        return surroundings
 
     def at_goal(self):
         return self.position == self.goal

@@ -1,4 +1,5 @@
 import pygame
+from loguru import logger
 
 MOVE_MOUSE_EVENT = pygame.USEREVENT + 1
 
@@ -9,6 +10,7 @@ class Color:
     GREEN = (0, 255, 0)
     BLUE = (0, 0, 255)
     RED = (255, 0, 0)
+    LIGHT_RED = (255, 200, 200)
 
 
 class MazeDisplay:
@@ -20,7 +22,8 @@ class MazeDisplay:
         self.cells = self._create_cells()
         self.screen = self._create_screen()
         self.mouse = mouse
-        pygame.time.set_timer(MOVE_MOUSE_EVENT, 1000)  # trigger every 1000 milliseconds
+        pygame.time.set_timer(MOVE_MOUSE_EVENT, 50)  # trigger every 1000 milliseconds
+        self.visited_cells = set()
 
     def _create_cells(self):
         cells = []
@@ -41,13 +44,16 @@ class MazeDisplay:
         return screen
 
     def _color_for_cell(self, row, column):
-        if self.maze.get(row, column) == 0:
-            return Color.WHITE
-        else:
+        if self.maze.get(row, column) == 1:  # wall cell
             return Color.BLACK
+        elif (row, column) in self.visited_cells:  # visited cell
+            return Color.LIGHT_RED
+        else:  # unvisited cell
+            return Color.WHITE
 
     def draw(self):
         running = True
+        start_time = pygame.time.get_ticks()
         while running:
             self.screen.fill(Color.BLACK)
 
@@ -61,6 +67,8 @@ class MazeDisplay:
             pygame.draw.rect(self.screen, Color.BLUE,
                              self.cells[self.end[0]][self.end[1]])
 
+            self.visited_cells.add(self.mouse.position)
+
             pygame.draw.rect(self.screen, Color.RED,
                              self.cells[self.mouse.position[0]][self.mouse.position[1]])
 
@@ -73,6 +81,9 @@ class MazeDisplay:
                     if not self.mouse.at_goal():
                         self.mouse.step()
                     else:
+                        end_time = pygame.time.get_ticks()
+                        logger.info(f"Mouse reached the goal in {end_time - start_time} ms.")
                         pygame.time.set_timer(MOVE_MOUSE_EVENT, 0)  # stop the timer
+                        running = False
 
         pygame.quit()

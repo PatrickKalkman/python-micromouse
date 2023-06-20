@@ -9,7 +9,7 @@ start = (1, 1)
 end = (size - 2, size - 2)
 maze = Maze(size)
 maze.carve_maze()
-mouse = BasicMouse(start, end)
+mouse = BasicMouse(start, end, maze)
 mazeDisplay = MazeDisplay(maze, start, end, size, mouse)
 
 # Initialize Pygame
