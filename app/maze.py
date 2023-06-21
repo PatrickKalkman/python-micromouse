@@ -3,9 +3,10 @@ import random
 
 
 class Maze:
-    def __init__(self, size):
+    def __init__(self, size, seed=0):
         self.size = size
         self.grid = self._create_empty_grid()
+        random.seed(seed)  # set the random seed
 
     def _create_empty_grid(self):
         return np.ones((self.size, self.size))

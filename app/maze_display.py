@@ -14,7 +14,7 @@ class MazeDisplay:
         self.cells = self._create_cells()
         self.screen = self._create_screen()
         self.mouse = mouse
-        pygame.time.set_timer(MOVE_MOUSE_EVENT, 500)  # trigger every 1000 milliseconds
+        pygame.time.set_timer(MOVE_MOUSE_EVENT, 70)  # trigger every 1000 milliseconds
         self.visited_cells = set()
 
     def _create_cells(self):
@@ -75,6 +75,7 @@ class MazeDisplay:
                         end_time = pygame.time.get_ticks()
                         logger.info(f"Mouse reached the goal in {end_time - start_time} ms.")
                         pygame.time.set_timer(MOVE_MOUSE_EVENT, 0)  # stop the timer
+                        self.mouse.save_exploration_data()
                         running = False
 
         pygame.quit()
