@@ -1,16 +1,8 @@
 import pygame
 from loguru import logger
 
+from micro_mouse_colors import MicroMouseColor
 MOVE_MOUSE_EVENT = pygame.USEREVENT + 1
-
-
-class Color:
-    BLACK = (0, 0, 0)
-    WHITE = (255, 255, 255)
-    GREEN = (0, 255, 0)
-    BLUE = (0, 0, 255)
-    RED = (255, 0, 0)
-    LIGHT_RED = (255, 200, 200)
 
 
 class MazeDisplay:
@@ -22,7 +14,7 @@ class MazeDisplay:
         self.cells = self._create_cells()
         self.screen = self._create_screen()
         self.mouse = mouse
-        pygame.time.set_timer(MOVE_MOUSE_EVENT, 50)  # trigger every 1000 milliseconds
+        pygame.time.set_timer(MOVE_MOUSE_EVENT, 500)  # trigger every 1000 milliseconds
         self.visited_cells = set()
 
     def _create_cells(self):
@@ -45,32 +37,31 @@ class MazeDisplay:
 
     def _color_for_cell(self, row, column):
         if self.maze.get(row, column) == 1:  # wall cell
-            return Color.BLACK
+            return MicroMouseColor.BLACK
         elif (row, column) in self.visited_cells:  # visited cell
-            return Color.LIGHT_RED
+            return MicroMouseColor.LIGHT_RED
         else:  # unvisited cell
-            return Color.WHITE
+            return MicroMouseColor.WHITE
 
     def draw(self):
         running = True
         start_time = pygame.time.get_ticks()
         while running:
-            self.screen.fill(Color.BLACK)
+            self.screen.fill(MicroMouseColor.BLACK)
 
             for row in range(self.maze.size):
                 for column in range(self.maze.size):
                     cell_color = self._color_for_cell(row, column)
                     pygame.draw.rect(self.screen, cell_color, self.cells[row][column])
 
-            pygame.draw.rect(self.screen, Color.GREEN,
+            pygame.draw.rect(self.screen, MicroMouseColor.GREEN,
                              self.cells[self.start[0]][self.start[1]])
-            pygame.draw.rect(self.screen, Color.BLUE,
+            pygame.draw.rect(self.screen, MicroMouseColor.BLUE,
                              self.cells[self.end[0]][self.end[1]])
 
             self.visited_cells.add(self.mouse.position)
 
-            pygame.draw.rect(self.screen, Color.RED,
-                             self.cells[self.mouse.position[0]][self.mouse.position[1]])
+            self.mouse.draw(self.screen, self.cell_size)
 
             pygame.display.flip()
 
