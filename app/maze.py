@@ -2,7 +2,7 @@ import numpy as np
 import random
 import pygame
 
-from micro_mouse_colors import MicroMouseColor
+from app.micro_mouse_colors import MicroMouseColor
 
 
 class Maze:

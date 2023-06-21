@@ -12,7 +12,7 @@ class MazeEventLoop:
         self.maze = maze
         self.mouse = mouse
         self.screen = self._initialize_screen(cell_size)
-        pygame.time.set_timer(MOVE_MOUSE_EVENT, 70)
+        pygame.time.set_timer(MOVE_MOUSE_EVENT, 20)
 
     def _initialize_screen(self, cell_size):
         screen_size = self.maze.size * cell_size

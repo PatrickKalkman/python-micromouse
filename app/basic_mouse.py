@@ -48,14 +48,20 @@ class BasicMouse(BaseMouse):
         unvisited_directions = self.get_unvisited_directions(surroundings)
 
         if unvisited_directions:
-            # move to an unvisited cell
-            self.stack.append(self.position)
-            self.move(unvisited_directions[0])
+            self.move_to_unvisited(unvisited_directions)
         elif self.stack:
-            # backtrack to the last junction
-            backtrack_position = self.stack.pop()
-            self.direction = self.get_direction_from_positions(backtrack_position, self.position)
-            self.position = self.path.pop()
+            self.backtrack()
+
+    def move_to_unvisited(self, unvisited_directions):
+        # move to an unvisited cell
+        self.stack.append(self.position)
+        self.move(unvisited_directions[0])
+
+    def backtrack(self):
+        # backtrack to the last junction
+        backtrack_position = self.stack.pop()
+        self.direction = self.get_direction_from_positions(backtrack_position, self.position)
+        self.position = self.path.pop()
 
     def get_unvisited_directions(self, surroundings):
         """Helper function to get unvisited directions."""
@@ -83,29 +89,38 @@ class BasicMouse(BaseMouse):
 
         while heap:
             dist, current = heapq.heappop(heap)
-            if current in visited:
+
+            if self.is_visited_or_distance_changed(current, visited, dist):
                 continue
 
             visited.add(current)
+
             if current == self.goal:  # stop when the goal is found
                 break
 
-            if dist != self.distances[current]:
-                continue
+            self.update_distances_and_predecessors(heap, current)
 
-            self.update_distances_and_predecessors(heap, current, visited)
+    def is_visited_or_distance_changed(self, current, visited, dist):
+        return current in visited or dist != self.distances[current]
 
-    def update_distances_and_predecessors(self, heap, current, visited):
+    def update_distances_and_predecessors(self, heap, current):
         surroundings = self.inspect_surroundings()
         for direction, cell in surroundings.items():
             new_position = self.add_direction_to_position(current, BaseMouse.MOVES[direction])
+
             # only consider cells that are in the visited set and are not walls
-            if new_position in self.visited and new_position not in self.walls:
-                alt_dist = self.distances[current] + 1
-                if alt_dist < self.distances[new_position]:
-                    self.distances[new_position] = alt_dist
-                    self.predecessors[new_position] = current
-                    heapq.heappush(heap, (alt_dist, new_position))
+            if self.is_valid_position(new_position):
+                self.update_distance_and_predecessor(heap, current, new_position)
+
+    def is_valid_position(self, position):
+        return position in self.visited and position not in self.walls
+
+    def update_distance_and_predecessor(self, heap, current, new_position):
+        alt_dist = self.distances[current] + 1
+        if alt_dist < self.distances[new_position]:
+            self.distances[new_position] = alt_dist
+            self.predecessors[new_position] = current
+            heapq.heappush(heap, (alt_dist, new_position))
 
     def reconstruct_path(self):
         self.shortest_path = self.construct_path_from_predecessors()[::-1]
