@@ -1,7 +1,7 @@
 import argparse
 import pygame
 from maze import Maze
-from maze_display import MazeDisplay
+from maze_event_loop import MazeEventLoop
 from basic_mouse import BasicMouse
 
 
@@ -10,7 +10,7 @@ def main(seed, exploring):
     size = 29
     start = (1, 1)
     end = (size - 2, size - 2)
-    maze = Maze(size, seed)
+    maze = Maze(size, start, end, seed)
     maze.carve_maze()
 
     mouse = BasicMouse(start, end, maze, is_exploring=exploring)
@@ -19,10 +19,10 @@ def main(seed, exploring):
         mouse.run_dijkstra()
         mouse.reconstruct_path()
 
-    mazeDisplay = MazeDisplay(maze, start, end, size, mouse)
+    maze_event_loop = MazeEventLoop(maze, size, mouse)
 
     pygame.init()
-    mazeDisplay.draw()
+    maze_event_loop.render_and_handle_events()
 
 
 if __name__ == "__main__":

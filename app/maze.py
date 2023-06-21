@@ -1,11 +1,19 @@
 import numpy as np
 import random
+import pygame
+
+from micro_mouse_colors import MicroMouseColor
 
 
 class Maze:
-    def __init__(self, size, seed=0):
+    def __init__(self, size, start, end, seed=0):
+        self.cells = []
+        self.visited_cells = set()
         self.size = size
+        self.start = start
+        self.end = end
         self.grid = self._create_empty_grid()
+        self._create_cells()
         random.seed(seed)  # set the random seed
 
     def _create_empty_grid(self):
@@ -32,3 +40,35 @@ class Maze:
 
     def get(self, row, column):
         return self.grid[row][column]
+
+    def _color_for_cell(self, row, column):
+        if self.get(row, column) == 1:  # wall cell
+            return MicroMouseColor.BLACK
+        elif (row, column) in self.visited_cells:  # visited cell
+            return MicroMouseColor.LIGHT_RED
+        else:  # unvisited cell
+            return MicroMouseColor.WHITE
+
+    def _create_cells(self):
+        for row in range(self.size):
+            row_cells = []
+            for column in range(self.size):
+                cell_rect = pygame.Rect(column * self.size,
+                                        row * self.size,
+                                        self.size, self.size)
+                row_cells.append(cell_rect)
+            self.cells.append(row_cells)
+
+    def add_to_visited_cells(self, position):
+        self.visited_cells.add(position)
+
+    def draw(self, screen):
+        for row in range(self.size):
+            for column in range(self.size):
+                cell_color = self._color_for_cell(row, column)
+                pygame.draw.rect(screen, cell_color, self.cells[row][column])
+
+        pygame.draw.rect(screen, MicroMouseColor.GREEN,
+                         self.cells[self.start[0]][self.start[1]])
+        pygame.draw.rect(screen, MicroMouseColor.BLUE,
+                         self.cells[self.end[0]][self.end[1]])

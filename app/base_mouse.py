@@ -11,7 +11,7 @@ class BaseMouse:
 
     def __init__(self, position, goal, maze, exploring, view_distance=2):
         self.position = position
-        self.start_postion = position
+        self.start_position = position
         self.goal = goal
         self.view_distance = view_distance
         self.maze = maze
@@ -20,43 +20,49 @@ class BaseMouse:
         self.walls = set()
         self.visited = set()
 
-    def look(self):
+    def inspect_surroundings(self):
         surroundings = {}
-
         for direction, (dx, dy) in BaseMouse.MOVES.items():
             x, y = self.position[0] + dx * self.view_distance, self.position[1] + dy * self.view_distance
 
             if 0 <= x < self.maze.size and 0 <= y < self.maze.size:
-                if self.exploring:
-                    surroundings[direction] = self.maze.get(x, y)
-                else:
-                    cell_value = 0 if (x, y) in self.visited else 1
-                    surroundings[direction] = cell_value
+                surroundings[direction] = self._inspect_cell(x, y)
 
         return surroundings
 
+    def _inspect_cell(self, x, y):
+        if self.exploring:
+            return self.maze.get(x, y)
+        else:
+            return 0 if (x, y) in self.visited else 1
+
     def save_exploration_data(self, filename='./mouse_exploration/exploration_data.json'):
-        data = {
+        data = self._prepare_exploration_data()
+        with open(filename, 'w') as f:
+            json.dump(data, f)
+
+    def _prepare_exploration_data(self):
+        return {
             'visited': list(self.visited),
             'walls': list(self.walls),
             'maze_size': self.maze.size,
             'goal': self.goal,
-            'start': self.start_postion
+            'start': self.start_position
         }
-        with open(filename, 'w') as f:
-            json.dump(data, f)
 
     def load_exploration_data(self, filename='./mouse_exploration/exploration_data.json'):
         with open(filename, 'r') as f:
             data = json.load(f)
+        self._update_mouse_data(data)
+
+    def _update_mouse_data(self, data):
         self.visited = set(tuple(pos) for pos in data['visited'])
         self.visited.add((27, 27))
         self.walls = set(tuple(pos) for pos in data['walls'])
         self.goal = tuple(data['goal'])
         self.position = tuple(data['start'])
-        # Assuming the maze size doesn't change
         if self.maze.size != data['maze_size']:
-            print("Warning: loaded maze size doesn't match current maze size.")
+            logger.warning("Loaded maze size doesn't match current maze size.")
 
     def at_goal(self):
         return self.position == self.goal
@@ -68,15 +74,16 @@ class BaseMouse:
         raise NotImplementedError
 
     def draw(self, screen, cell_size):
-        # calculate the points for the triangle
-        x, y = self.position[1] * cell_size, self.position[0] * cell_size  # swap x and y
-        if self.direction == (-1, 0):  # Up
-            points = [(x, y + cell_size), (x + cell_size, y + cell_size), (x + cell_size / 2, y)]
-        elif self.direction == (1, 0):  # Down
-            points = [(x, y), (x + cell_size, y), (x + cell_size / 2, y + cell_size)]
-        elif self.direction == (0, -1):  # Left
-            points = [(x + cell_size, y), (x + cell_size, y + cell_size), (x, y + cell_size / 2)]
-        else:  # Right
-            points = [(x, y), (x, y + cell_size), (x + cell_size, y + cell_size / 2)]
-
+        x, y = self.position[1] * cell_size, self.position[0] * cell_size
+        points = self._calculate_draw_points(x, y, cell_size)
         pygame.draw.polygon(screen, MicroMouseColor.RED, points)
+
+    def _calculate_draw_points(self, x, y, cell_size):
+        if self.direction == (-1, 0):  # Up
+            return [(x, y + cell_size), (x + cell_size, y + cell_size), (x + cell_size / 2, y)]
+        elif self.direction == (1, 0):  # Down
+            return [(x, y), (x + cell_size, y), (x + cell_size / 2, y + cell_size)]
+        elif self.direction == (0, -1):  # Left
+            return [(x + cell_size, y), (x + cell_size, y + cell_size), (x, y + cell_size / 2)]
+        else:  # Right
+            return [(x, y), (x, y + cell_size), (x + cell_size, y + cell_size / 2)]
