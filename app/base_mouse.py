@@ -3,7 +3,7 @@ import pygame
 
 from loguru import logger
 
-from micro_mouse_colors import MicroMouseColor
+from app.micro_mouse_colors import MicroMouseColor
 
 
 class BaseMouse:

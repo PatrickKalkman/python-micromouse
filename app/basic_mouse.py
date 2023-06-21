@@ -1,8 +1,6 @@
 import heapq
 from collections import defaultdict
 
-from loguru import logger
-
 from base_mouse import BaseMouse
 
 
@@ -37,9 +35,12 @@ class BasicMouse(BaseMouse):
     def follow_shortest_path(self):
         self.step_counter += 1
         if self.shortest_path:
-            new_position = self.shortest_path.pop(0)
-            self.direction = (new_position[0] - self.position[0], new_position[1] - self.position[1])
-            self.position = new_position
+            self.move_along_shortest_path()
+
+    def move_along_shortest_path(self):
+        new_position = self.shortest_path.pop(0)
+        self.direction = self.get_direction_from_positions(new_position, self.position)
+        self.position = new_position
 
     def explore(self):
         self.visited.add(self.position)
@@ -107,9 +108,12 @@ class BasicMouse(BaseMouse):
                     heapq.heappush(heap, (alt_dist, new_position))
 
     def reconstruct_path(self):
+        self.shortest_path = self.construct_path_from_predecessors()[::-1]
+
+    def construct_path_from_predecessors(self):
         path = []
         current = self.goal
         while current != self.position:
             path.append(current)
             current = self.predecessors[current]
-        self.shortest_path = path[::-1]
+        return path
