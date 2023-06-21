@@ -29,18 +29,17 @@ class BasicMouse(BaseMouse):
         return position[0] + direction[0], position[1] + direction[1]
 
     def step(self):
-        # Check if current position is already the goal
         if self.at_goal():
             return
 
-        if self.is_exploring:
-            self.explore()
-        else:
-            self.step_counter += 1
-            if self.shortest_path:
-                new_position = self.shortest_path.pop(0)
-                self.direction = (new_position[0] - self.position[0], new_position[1] - self.position[1])
-                self.position = new_position
+        self.explore() if self.is_exploring else self.follow_shortest_path()
+
+    def follow_shortest_path(self):
+        self.step_counter += 1
+        if self.shortest_path:
+            new_position = self.shortest_path.pop(0)
+            self.direction = (new_position[0] - self.position[0], new_position[1] - self.position[1])
+            self.position = new_position
 
     def explore(self):
         self.visited.add(self.position)
