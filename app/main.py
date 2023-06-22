@@ -12,8 +12,10 @@ def main(seed, exploring):
     end = (size - 2, size - 2)
     maze = Maze(size, start, end, seed)
     maze.carve_maze()
+    data_location = f"./app/mouse_exploration/exploration_data_{seed}.json"
 
-    mouse = BasicMouse(start, end, maze, is_exploring=exploring)
+    mouse = BasicMouse(start, end, maze, exploration_data_location=data_location,
+                       is_exploring=exploring)
     if not exploring:
         mouse.load_exploration_data()
         mouse.run_dijkstra()

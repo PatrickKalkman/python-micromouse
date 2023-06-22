@@ -5,8 +5,10 @@ from base_mouse import BaseMouse
 
 
 class BasicMouse(BaseMouse):
-    def __init__(self, position, goal, maze, is_exploring=True, view_distance=1):
-        super().__init__(position, goal, maze, is_exploring, view_distance)
+    def __init__(self, position, goal, maze, exploration_data_location, is_exploring,
+                 view_distance=1):
+        super().__init__(position, goal, maze, is_exploring,
+                         exploration_data_location, view_distance)
         self.stack = []  # for depth-first search
         self.visited = set()  # to keep track of visited cells
         self.walls = set()
@@ -60,7 +62,8 @@ class BasicMouse(BaseMouse):
     def backtrack(self):
         # backtrack to the last junction
         backtrack_position = self.stack.pop()
-        self.direction = self.get_direction_from_positions(backtrack_position, self.position)
+        self.direction = self.get_direction_from_positions(backtrack_position,
+                                                           self.position)
         self.position = self.path.pop()
 
     def get_unvisited_directions(self, surroundings):
@@ -68,7 +71,8 @@ class BasicMouse(BaseMouse):
         unvisited_directions = []
 
         for direction, cell in surroundings.items():
-            new_position = self.add_direction_to_position(self.position, BaseMouse.MOVES[direction])
+            new_position = self.add_direction_to_position(self.position,
+                                                          BaseMouse.MOVES[direction])
 
             # Only consider directions leading to open spaces and not previously visited
             if cell == 1:  # if cell is a wall
@@ -79,7 +83,6 @@ class BasicMouse(BaseMouse):
         return unvisited_directions
 
     def get_direction_from_positions(self, pos1, pos2):
-        """Helper function to get the direction from one position to another."""
         return pos1[0] - pos2[0], pos1[1] - pos2[1]
 
     def run_dijkstra(self):
@@ -106,7 +109,8 @@ class BasicMouse(BaseMouse):
     def update_distances_and_predecessors(self, heap, current):
         surroundings = self.inspect_surroundings()
         for direction, cell in surroundings.items():
-            new_position = self.add_direction_to_position(current, BaseMouse.MOVES[direction])
+            new_position = self.add_direction_to_position(current,
+                                                          BaseMouse.MOVES[direction])
 
             # only consider cells that are in the visited set and are not walls
             if self.is_valid_position(new_position):
