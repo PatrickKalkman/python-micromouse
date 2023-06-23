@@ -42,5 +42,3 @@ python app/main.py --seed 767 --exploring
 ```
 
 When you want to run the speed run phase, just remove the `--exploring` flag:
-
-```bash
