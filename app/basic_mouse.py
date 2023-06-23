@@ -17,16 +17,11 @@ class BasicMouse(BaseMouse):
         self.distances = defaultdict(lambda: float('inf'))
         self.predecessors = {}
         self.is_exploring = is_exploring
-        self.step_counter = 0
 
     def move(self, direction):
         self.direction = direction
         self.path.append(self.position)  # add current position to path before moving
         self.position = self.add_direction_to_position(self.position, direction)
-
-    def add_direction_to_position(self, position, direction):
-        """Helper function to add a direction to a position."""
-        return position[0] + direction[0], position[1] + direction[1]
 
     def step(self):
         if self.at_goal():
@@ -35,7 +30,6 @@ class BasicMouse(BaseMouse):
         self.explore() if self.is_exploring else self.follow_shortest_path()
 
     def follow_shortest_path(self):
-        self.step_counter += 1
         if self.shortest_path:
             self.move_along_shortest_path()
 
@@ -54,20 +48,7 @@ class BasicMouse(BaseMouse):
         elif self.stack:
             self.backtrack()
 
-    def move_to_unvisited(self, unvisited_directions):
-        # move to an unvisited cell
-        self.stack.append(self.position)
-        self.move(unvisited_directions[0])
-
-    def backtrack(self):
-        # backtrack to the last junction
-        backtrack_position = self.stack.pop()
-        self.direction = self.get_direction_from_positions(backtrack_position,
-                                                           self.position)
-        self.position = self.path.pop()
-
     def get_unvisited_directions(self, surroundings):
-        """Helper function to get unvisited directions."""
         unvisited_directions = []
 
         for direction, cell in surroundings.items():
@@ -81,6 +62,21 @@ class BasicMouse(BaseMouse):
                 unvisited_directions.append(BaseMouse.MOVES[direction])
 
         return unvisited_directions
+
+    def add_direction_to_position(self, position, direction):
+        return position[0] + direction[0], position[1] + direction[1]
+
+    def move_to_unvisited(self, unvisited_directions):
+        # move to an unvisited cell
+        self.stack.append(self.position)
+        self.move(unvisited_directions[0])
+
+    def backtrack(self):
+        # backtrack to the last junction
+        backtrack_position = self.stack.pop()
+        self.direction = self.get_direction_from_positions(backtrack_position,
+                                                           self.position)
+        self.position = self.path.pop()
 
     def get_direction_from_positions(self, pos1, pos2):
         return pos1[0] - pos2[0], pos1[1] - pos2[1]

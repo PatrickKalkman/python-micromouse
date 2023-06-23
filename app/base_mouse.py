@@ -39,6 +39,11 @@ class BaseMouse:
         else:
             return 0 if (x, y) in self.visited else 1
 
+    def load_exploration_data(self):
+        with open(self.exploration_data_location, 'r') as f:
+            data = json.load(f)
+        self._update_mouse_data(data)
+
     def save_exploration_data(self):
         data = self._prepare_exploration_data()
         with open(self.exploration_data_location, 'w') as f:
@@ -52,11 +57,6 @@ class BaseMouse:
             'goal': self.goal,
             'start': self.start_position
         }
-
-    def load_exploration_data(self):
-        with open(self.exploration_data_location, 'r') as f:
-            data = json.load(f)
-        self._update_mouse_data(data)
 
     def _update_mouse_data(self, data):
         self.visited = set(tuple(pos) for pos in data['visited'])
